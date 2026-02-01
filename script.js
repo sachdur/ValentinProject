@@ -26,8 +26,8 @@ function handleNoClick() {
 
   // Agrandit le bouton "Oui" (avec une limite pour éviter de casser la page)
   const style = window.getComputedStyle(yesButton);
-  const currentSizePx = parseFloat(style.fontSize) || 24;
-  const nextSizePx = Math.min(currentSizePx * 1.25, 96); // limite à 96px
+  const currentSizePx = parseFloat(style.fontSize) || 48;
+  const nextSizePx = Math.min(currentSizePx * 1.25, 192); // limite à 96px
   yesButton.style.fontSize = `${nextSizePx}px`;
 }
 
