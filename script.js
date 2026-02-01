@@ -1,115 +1,46 @@
-(() => {
-  const questionContainer = document.querySelector('.question-container');
-  const resultContainer = document.querySelector('.result-container');
-  const gifResult = document.querySelector('.gif-result');
-  const heartLoader = document.querySelector('.cssload-main');
-  const yesBtn = document.querySelector('.js-yes-btn');
-  const noBtn = document.querySelector('.js-no-btn');
-  const buttonArea = document.querySelector('.button-container');
-  const soundBtn = document.querySelector('.js-sound-btn');
+// script.js
 
-  if (!questionContainer || !resultContainer || !gifResult || !heartLoader || !yesBtn || !noBtn || !buttonArea) {
-    console.error('Missing expected DOM elements. Check your HTML class names.');
-    return;
-  }
+const messages = [
+  "Tu es sûr(e) ?",
+  "Vraiment sûr(e) ??",
+  "Certain(e) à 100% ?",
+  "S’il te plaît… 🥺",
+  "Réfléchis bien…",
+  "Si tu dis non, je vais être triste…",
+  "Je vais être très triste…",
+  "Je vais être très très très triste…",
+  "Ok… j’arrête de demander…",
+  "Je plaisante 😄 dis oui s’il te plaît ❤️"
+];
 
-  let revealTimeout = null;
+let messageIndex = 0;
 
-  function clamp(v, min, max) {
-    return Math.max(min, Math.min(max, v));
-  }
+function handleNoClick() {
+  const noButton = document.querySelector(".no-button");
+  const yesButton = document.querySelector(".yes-button");
+  if (!noButton || !yesButton) return;
 
-  function moveNoButton() {
-    // Ensure the button stays inside the button area.
-    const areaRect = buttonArea.getBoundingClientRect();
-    const btnRect = noBtn.getBoundingClientRect();
+  // Change le texte du bouton "Non"
+  noButton.textContent = messages[messageIndex];
+  messageIndex = (messageIndex + 1) % messages.length;
 
-    const maxX = Math.max(0, areaRect.width - btnRect.width);
-    const maxY = Math.max(0, areaRect.height - btnRect.height);
+  // Agrandit le bouton "Oui" (avec une limite pour éviter de casser la page)
+  const style = window.getComputedStyle(yesButton);
+  const currentSizePx = parseFloat(style.fontSize) || 24;
+  const nextSizePx = Math.min(currentSizePx * 1.25, 96); // limite à 96px
+  yesButton.style.fontSize = `${nextSizePx}px`;
+}
 
-    const newX = Math.random() * maxX;
-    const newY = Math.random() * maxY;
+function handleYesClick() {
+  // Redirection vers la page "oui"
+  window.location.href = "./yes_page.html";
+}
 
-    noBtn.style.left = `${Math.round(newX)}px`;
-    noBtn.style.top = `${Math.round(newY)}px`;
-  }
+// Liaison automatique des boutons au chargement de la page
+document.addEventListener("DOMContentLoaded", () => {
+  const noButton = document.querySelector(".no-button");
+  const yesButton = document.querySelector(".yes-button");
 
-  // Desktop hover
-  noBtn.addEventListener('mouseenter', moveNoButton);
-
-  // Mobile / touch (and also works on desktop)
-  noBtn.addEventListener(
-    'touchstart',
-    (e) => {
-      e.preventDefault();
-      moveNoButton();
-    },
-    { passive: false }
-  );
-
-  // If user tries to click "No", we still move it.
-  noBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    moveNoButton();
-  });
-
-  // Keep it within bounds on resize.
-  window.addEventListener('resize', () => {
-    const areaRect = buttonArea.getBoundingClientRect();
-    const btnRect = noBtn.getBoundingClientRect();
-
-    const left = parseFloat(noBtn.style.left || '0');
-    const top = parseFloat(noBtn.style.top || '0');
-
-    const maxX = Math.max(0, areaRect.width - btnRect.width);
-    const maxY = Math.max(0, areaRect.height - btnRect.height);
-
-    noBtn.style.left = `${Math.round(clamp(left, 0, maxX))}px`;
-    noBtn.style.top = `${Math.round(clamp(top, 0, maxY))}px`;
-  });
-
-  yesBtn.addEventListener('click', () => {
-    if (revealTimeout) clearTimeout(revealTimeout);
-
-    // Make sure the result video is allowed to play on mobile.
-    try {
-      gifResult.currentTime = 0;
-      gifResult.play().catch(() => {});
-    } catch (_) {}
-
-    questionContainer.style.display = 'none';
-    heartLoader.style.display = 'block';
-
-    revealTimeout = setTimeout(() => {
-      heartLoader.style.display = 'none';
-      resultContainer.style.display = 'block';
-
-      // Optional: show a button to enable sound (most phones block autoplay w/ sound)
-      if (soundBtn) soundBtn.hidden = false;
-    }, 2500);
-  });
-
-  if (soundBtn) {
-    soundBtn.addEventListener('click', async () => {
-      try {
-        gifResult.muted = false;
-        gifResult.volume = 1;
-        await gifResult.play();
-        soundBtn.hidden = true;
-      } catch (e) {
-        // If the browser still blocks it, keep the button visible.
-        console.warn('Sound/Play blocked by browser:', e);
-      }
-    });
-  }
-
-  // Initial "No" position inside the area
-  requestAnimationFrame(() => {
-    const areaRect = buttonArea.getBoundingClientRect();
-    const btnRect = noBtn.getBoundingClientRect();
-    const maxX = Math.max(0, areaRect.width - btnRect.width);
-    const startX = Math.round(maxX * 0.65);
-    noBtn.style.left = `${startX}px`;
-    noBtn.style.top = '0px';
-  });
-})();
+  if (noButton) noButton.addEventListener("click", handleNoClick);
+  if (yesButton) yesButton.addEventListener("click", handleYesClick);
+});
